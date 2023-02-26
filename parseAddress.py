@@ -40,7 +40,7 @@ class DummySifiveCache:
             tag = setIdx >> self.setBits
             up_tag = getBits(tag, self.tagBits - 1, 0)
 
-        return (up_tag, updated_set, getBits(offset, self.offsetBits, 0))
+        return (up_tag, updated_set, getBits(offset, self.offsetBits - 1, 0))
 
     def pAddr(self, x: int, coreId: int) -> Tuple[int, int, int]:
         offset = getBits(x, self.offsetBits - 1, 0)
@@ -57,7 +57,7 @@ class DummySifiveCache:
             self.setBits - 1,
             self.setBits - self.coreBits,
         )
-        setIdx = getBits(setIdx, self.setBits - self.coreBits, 0) | coreId << (
+        setIdx = getBits(setIdx, self.setBits - self.coreBits - 1, 0) | coreId << (
             self.setBits - self.coreBits
         )
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     assert dut.pAddr(0xAAAA, 3) == (0x2AA, 0xE, 0xA)
     assert dut.pAddr(0x5ABC, 2) == (0x16A, 0xB, 0xC)
 
-    for x in range(10):
+    for x in range(1024):
         addr = random.randrange(0, 2**16)
         core = random.randrange(0, NUM_CORES)
 
@@ -104,4 +104,4 @@ if __name__ == "__main__":
         if pAddr_result != parseAddress_result:
             printSplitAddr(addr, parseAddress_result)
             printSplitAddr(addr, pAddr_result)
-            print("MISMATCH")
+            print(f"MISMATCH (coreId = {core})")
